@@ -10,6 +10,10 @@ require "xlsxtream/io/stream"
 module Xlsxtream
   class Workbook
 
+    # definition of characters which are less than the maximum width of 0-9 in the default font for use in String#count.
+    # This is used for autowidth calculations
+    THIN_CHARS = '^.acfijklrstxzFIJL()-'.freeze
+
     class << self
 
       def open(data = nil, options = {})
@@ -40,7 +44,8 @@ module Xlsxtream
       name ||= "Sheet#{@worksheets.size + 1}"
       sheet_id = @worksheets[name]
       @io.add_file "xl/worksheets/sheet#{sheet_id}.xml"
-      worksheet = Worksheet.new(@io, use_sst ? @sst : nil)
+      cols_width = options[:cols_width]
+      worksheet = Worksheet.new(@io, use_sst ? @sst : nil, cols_width)
       yield worksheet if block_given?
       worksheet.close
       nil
@@ -100,7 +105,7 @@ module Xlsxtream
           <fonts count="1">
             <font>
               <sz val="12"/>
-              <name val="Calibri"/>
+              <name val="Arial"/>
               <family val="2"/>
             </font>
           </fonts>
