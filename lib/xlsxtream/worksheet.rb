@@ -4,15 +4,15 @@ require "xlsxtream/row"
 
 module Xlsxtream
   class Worksheet
-    def initialize(io, sst = nil, cols_width = nil)
+    def initialize(io, options = {})
       @io = io
       @rownum = 1
-      @sst = sst
-      write_header(cols_width)
+      @options = options
+      write_header
     end
 
     def <<(row)
-      @io << Row.new(row, @rownum, @sst).to_xml
+      @io << Row.new(row, @rownum, @options).to_xml
       @rownum += 1
     end
     alias_method :add_row, :<<
@@ -23,14 +23,14 @@ module Xlsxtream
 
     private
 
-    def write_header(cols_width)
+    def write_header
       @io << XML.header
       @io << XML.strip(<<-XML)
         <worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
       XML
 
       # for the width
-      write_cols(cols_width) unless cols_width.nil?
+      write_cols(@options[:cols_width]) unless @options[:cols_width].nil?
 
       @io << XML.strip(<<-XML)
           <sheetData>
